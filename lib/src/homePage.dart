@@ -54,7 +54,20 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text("Memento"),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Memento"),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  primary: Colors.black.withOpacity(0),
+                  elevation: 0,
+                ),
+                onPressed: () {},
+                child: Icon(Icons.account_box, size: 36,),
+              )
+            ],
+          ),
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
@@ -63,12 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     MaterialPageRoute(
                         builder: (context) => AddOrEditEventScreen(false)))
                 .then((value) {
-              const snackBar =
-                  SnackBar(content: Text("Event Added Successfully!"));
-              ScaffoldMessenger.of(context).showSnackBar(snackBar);
-
               getEvents();
-
             });
             getEvents();
           },
@@ -78,9 +86,9 @@ class _MyHomePageState extends State<MyHomePage> {
           child: ListView(
             children: <Widget>[
               DrawerHeader(
-                decoration: BoxDecoration(color: Colors.teal),
-                child: null,
-              ),
+                  child: Container(
+                child: Image.asset("assets/splash_image.png"),
+              )),
               ListTile(
                 title: Text("Dark Mode"),
                 trailing: Switch(
@@ -123,9 +131,6 @@ class _MyHomePageState extends State<MyHomePage> {
                       builder: (context) =>
                           AddOrEditEventScreen(true, position, event)))
               .then((value) {
-            const snackBar =
-                SnackBar(content: Text("Event Added Successfully!"));
-            ScaffoldMessenger.of(context).showSnackBar(snackBar);
             setState(() {
               getEvents();
             });
@@ -188,6 +193,8 @@ class _MyHomePageState extends State<MyHomePage> {
                                   content: Text("Event Deleted Successfully!"));
                               ScaffoldMessenger.of(context)
                                   .showSnackBar(snackBar);
+                              ScaffoldMessenger.of(context)
+                                  .hideCurrentSnackBar();
                               setState(() {
                                 getEvents();
                               });

@@ -143,10 +143,16 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
                         }
                         box.close();
                         Navigator.pop(context);
+                        const snackBar = SnackBar(
+                            content:
+                            Text("Event added successfully!"));
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                        ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
                         const snackBar = SnackBar(
                             content:
-                                Text("Field name and event can not be empty."));
+                                Text("Fields like name and event can not be empty."));
+                        ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
                     },
