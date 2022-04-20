@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   elevation: 0,
                 ),
                 onPressed: () {},
-                child: Icon(Icons.account_box, size: 36,),
+                child: Icon(Icons.account_circle_outlined, size: 36,),
               )
             ],
           ),
@@ -186,9 +186,12 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
                         child: ElevatedButton(
-                            onPressed: () {
+                            onPressed: ()  {
                               deleteEvent(position);
+                              // await AwesomeNotifications().cancel(position);
+                              AwesomeNotifications().cancelSchedule(position);
                               AwesomeNotifications().cancel(position);
+                              // AwesomeNotifications().dismissedSink.close();
                               const snackBar = SnackBar(
                                   content: Text("Event Deleted Successfully!"));
                               ScaffoldMessenger.of(context)

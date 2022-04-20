@@ -22,6 +22,12 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
   DateTime dateTime = DateTime.now();
 
   @override
+  void dispose() {
+    AwesomeNotifications().dismissedSink.close();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     if (widget.isEdit) {
       controllerName.text = widget.event!.name;
@@ -79,7 +85,7 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
                         onPressed: () {
                           DatePicker.showDatePicker(context,
                               showTitleActions: true,
-                              minTime: DateTime.now(),
+                              minTime: DateTime(1980, 1, 1),
                               maxTime: DateTime(2099, 12, 30),
                               onConfirm: (date) {
                             setState(() {
@@ -126,35 +132,39 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
                         var box = await Hive.openBox<Event>('event');
 
                         if (widget.isEdit) {
+                          AwesomeNotifications().cancel(widget.position!);
+                          AwesomeNotifications().cancelSchedule(widget.position!);
                           box.putAt(widget.position!, event);
                         } else {
                           box.add(event);
-                          AwesomeNotifications().createNotification(
-                            content: NotificationContent(
-                                id: box.length,
-                                channelKey: 'event_channel',
-                                title: "${event.name}'s ${event.event}",
-                                body: "${event.description}"),
-                            schedule: NotificationCalendar.fromDate(
-                              date: DateTime.now().add(Duration(seconds: 30)),
-                              repeats: true,
-                            ),
-                          );
                         }
+                        AwesomeNotifications().createNotification(
+                          content: NotificationContent(
+                              id: box.length,
+                              channelKey: 'event_channel',
+                              title: "${event.name}'s ${event.event}",
+                              body: "${event.description}"),
+                          schedule: NotificationCalendar(
+                            second: 1,
+                            hour: 1,
+                            day: dateTime.day,
+                            month: dateTime.month,
+                            repeats: true,
+                          ),
+                        );
                         box.close();
-                        Navigator.pop(context);
                         const snackBar = SnackBar(
-                            content:
-                            Text("Event added successfully!"));
+                            content: Text("Event added successfully!"));
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       } else {
                         const snackBar = SnackBar(
-                            content:
-                                Text("Fields like name and event can not be empty."));
+                            content: Text(
+                                "Fields like name and event can not be empty."));
                         ScaffoldMessenger.of(context).hideCurrentSnackBar();
                         ScaffoldMessenger.of(context).showSnackBar(snackBar);
                       }
+                      Navigator.pop(context);
                     },
                   ),
                 )
