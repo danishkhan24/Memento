@@ -54,6 +54,7 @@ class MyApp extends StatelessWidget {
       dark: ThemeClass.darkTheme,
       initial: savedThemeMode ?? AdaptiveThemeMode.light,
       builder: (theme, darkTheme) => MaterialApp(
+        debugShowCheckedModeBanner: false,
         themeMode: ThemeMode.system,
         theme: theme,
         darkTheme: darkTheme,

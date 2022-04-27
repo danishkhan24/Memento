@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:memento/src/add_or_edit_event_screen.dart';
+import 'package:memento/src/AddOrEditEventScreen.dart';
 import 'package:memento/src/eventModel.dart';
 import 'package:hive/hive.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -24,9 +24,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
       if (!isAllowed) {
-        // This is just a basic example. For real apps, you must show some
-        // friendly dialog box before call the request method.
-        // This is very important to not harm the user experience
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
@@ -34,7 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
     super.initState();
   }
 
-  void getEvents() async {
+  Future<void> getEvents() async {
     final box = await Hive.openBox<Event>('event');
     setState(() {
       eventList = box.values.toList();
@@ -42,7 +39,7 @@ class _MyHomePageState extends State<MyHomePage> {
     box.close();
   }
 
-  void deleteEvent(int key) async {
+  Future<void> deleteEvent(int key) async {
     final box = await Hive.openBox<Event>('event');
     box.deleteAt(key);
     setState(() {
@@ -53,68 +50,74 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("Memento"),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  primary: Colors.black.withOpacity(0),
-                  elevation: 0,
-                ),
-                onPressed: () {},
-                child: Icon(Icons.account_circle_outlined, size: 36,),
-              )
-            ],
-          ),
-        ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => AddOrEditEventScreen(false)))
-                .then((value) {
-              getEvents();
-            });
-            getEvents();
-          },
-          child: Icon(Icons.add),
-        ),
-        drawer: Drawer(
-          child: ListView(
-            children: <Widget>[
-              DrawerHeader(
-                  child: Container(
-                child: Image.asset("assets/splash_image.png"),
-              )),
-              ListTile(
-                title: Text("Dark Mode"),
-                trailing: Switch(
-                  value: _darkMode,
-                  onChanged: (bool value) {
-                    setState(() {
-                      _darkMode = value;
-                    });
-                    value
-                        ? AdaptiveTheme.of(context).setDark()
-                        : AdaptiveTheme.of(context).setLight();
-                  },
-                ),
+      appBar: AppBar(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text("Memento"),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                primary: Colors.black.withOpacity(0),
+                elevation: 0,
               ),
-              ListTile(
-                title: Text("Logout"),
-                trailing: Icon(Icons.logout, size: 28),
-              )
-            ],
-          ),
+              onPressed: () {},
+              child: Icon(
+                Icons.account_circle_outlined,
+                size: 36,
+              ),
+            ),
+          ],
         ),
-        body: Container(
-            child: ListView.builder(
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AddOrEditEventScreen(false)))
+              .then((value) {
+            getEvents();
+          });
+          getEvents();
+        },
+        child: Icon(Icons.add),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: <Widget>[
+            DrawerHeader(
+              child: Container(
+                child: Image.asset("assets/splash_image.png"),
+              ),
+            ),
+            ListTile(
+              title: Text("Dark Mode"),
+              trailing: Switch(
+                value: _darkMode,
+                onChanged: (bool value) {
+                  setState(() {
+                    _darkMode = value;
+                  });
+                  value
+                      ? AdaptiveTheme.of(context).setDark()
+                      : AdaptiveTheme.of(context).setLight();
+                },
+              ),
+            ),
+            ListTile(
+              title: Text("Logout"),
+              trailing: Icon(Icons.logout, size: 28),
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        child: ListView.builder(
           itemCount: eventList.length,
           itemBuilder: _itemBuilder,
-        )));
+        ),
+      ),
+    );
   }
 
   Widget _itemBuilder(BuildContext context, position) {
@@ -134,18 +137,6 @@ class _MyHomePageState extends State<MyHomePage> {
             setState(() {
               getEvents();
             });
-
-            AwesomeNotifications().createNotification(
-              content: NotificationContent(
-                  id: position,
-                  channelKey: 'event_channel',
-                  title: "${event.name}'s ${event.event}",
-                  body: "${event.description}"),
-              schedule: NotificationCalendar.fromDate(
-                date: DateTime.now().add(Duration(seconds: 30)),
-                repeats: true,
-              ),
-            );
           });
         },
         child: Card(
@@ -169,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> {
                             child: Icon(Icons.date_range, color: Colors.blue),
                           ),
                           Text("${event.dateTime.day} - ${event.dateTime.month}"
-                              " - ${event.dateTime.year}"),
+                              " - ${event.dateTime.year} ${event.dateTime.hour}:${event.dateTime.minute} "),
                         ],
                       ),
                     ),
@@ -183,28 +174,31 @@ class _MyHomePageState extends State<MyHomePage> {
                       child: Text(event.event),
                     ),
                     Container(
-                      child: Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: ElevatedButton(
-                            onPressed: ()  {
-                              deleteEvent(position);
-                              // await AwesomeNotifications().cancel(position);
-                              AwesomeNotifications().cancelSchedule(position);
-                              AwesomeNotifications().cancel(position);
-                              // AwesomeNotifications().dismissedSink.close();
-                              const snackBar = SnackBar(
-                                  content: Text("Event Deleted Successfully!"));
-                              ScaffoldMessenger.of(context)
-                                  .showSnackBar(snackBar);
-                              ScaffoldMessenger.of(context)
-                                  .hideCurrentSnackBar();
-                              setState(() {
-                                getEvents();
-                              });
-                            },
-                            child: Icon(
-                              Icons.delete,
-                            )),
+                      child: Row(
+                        children: [
+                          Text("Reminded ${event.reminder}"),
+                          Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: ElevatedButton(
+                              onPressed: () async {
+                                await deleteEvent(position);
+                                await AwesomeNotifications()
+                                    .cancelSchedule(event.id);
+                                const snackBar = SnackBar(
+                                    content: Text("Event Deleted Successfully!"));
+                                ScaffoldMessenger.of(context)
+                                    .showSnackBar(snackBar);
+                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                setState(() {
+                                  getEvents();
+                                });
+                              },
+                              child: Icon(
+                                Icons.delete,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -213,14 +207,14 @@ class _MyHomePageState extends State<MyHomePage> {
                   mainAxisAlignment: MainAxisAlignment.start,
                   children: [
                     Container(
-                      width: screenWidth * 0.8,
+                      width: screenWidth * 0.7,
                       child: Padding(
                         padding: EdgeInsets.all(8.0),
                         child: Text(event.description),
                       ),
                     ),
                   ],
-                )
+                ),
               ],
             ),
           ),

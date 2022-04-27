@@ -15,42 +15,18 @@ class Event {
   @HiveField(3)
   String description;
 
+  @HiveField(4)
+  int id;
+
+  @HiveField(5)
+  String reminder;
+
   Event({
     required this.name,
     required this.event,
     required this.dateTime,
     required this.description,
+    required this.id,
+    required this.reminder,
   });
-
-/*  factory Event.fromJson(Map<String, dynamic> json){
-    return Event(
-        name: json['name'],
-        event: json['event'],
-        dateTime: json['dateTime'],
-        description: json['description']
-    );
-  }*/
-
-  static int daysBetween(Event event) {
-    DateTime now = DateTime.now();
-    final from = DateTime(now.year, now.month, now.day);
-    final to = DateTime(event.dateTime.year, event.dateTime.month, event.dateTime.day);
-    return (to.difference(from).inHours / 24).round();
-  }
 }
-
-/*class Item {
-  Event event;
-  late int daysLeft;
-
-  Item({required this.event, daysLeft}){
-    daysLeft = Event.daysBetween(this.event);
-  }
-
-  factory Item.fromJson(Map<String, dynamic> parsedJson){
-    return Item(
-        event: Event.fromJson(parsedJson['event']),
-        daysLeft: parsedJson['description']
-    );
-  }
-}*/
