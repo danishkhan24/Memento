@@ -1,0 +1,38 @@
+{
+  "project_info": {
+    "project_number": "1062142738282",
+    "project_id": "memento-42acd",
+    "storage_bucket": "memento-42acd.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1062142738282:android:7f50e3544b649dd9256f13",
+        "android_client_info": {
+          "package_name": "com.wiki.make.me.remember.memento"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1062142738282-r57v8t7uapv1nvg1nciq4us3utdfuhbe.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.wiki.make.me.remember.memento",
+            "certificate_hash": "72c6ee3d0a69788aec4aaaf68dcd96bee57339f4"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD3PxmC7jHGpNjdFRl7I8ZxBU78OcJDE0g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

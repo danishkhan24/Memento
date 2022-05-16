@@ -1,18 +1,23 @@
 import 'dart:io';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:memento/src/homePage.dart';
+import 'package:memento/homePage.dart';
 import 'package:hive/hive.dart';
 import 'eventModel.dart';
+import 'package:unsplash_client/unsplash_client.dart';
+
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final savedThemeMode = await AdaptiveTheme.getThemeMode();
   Directory directory = await getApplicationDocumentsDirectory();
   FirebaseApp firebaseApp = await Firebase.initializeApp();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  // final GoogleSignIn _googleSignIn = GoogleSignIn();
   Hive.init(directory.path);
   Hive.registerAdapter(EventAdapter());
   AwesomeNotifications().initialize(

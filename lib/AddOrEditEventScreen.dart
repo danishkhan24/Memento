@@ -1,16 +1,14 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:memento/src/eventModel.dart';
+import 'package:memento/eventModel.dart';
 import 'package:hive/hive.dart';
 import 'package:flutter_datetime_picker/flutter_datetime_picker.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:uuid/uuid.dart';
 
 class AddOrEditEventScreen extends StatefulWidget {
   final bool isEdit;
-  int? position;
-  Event? event;
+  final int? position;
+  final Event? event;
 
   AddOrEditEventScreen(this.isEdit, [this.position, this.event]);
 
@@ -24,7 +22,6 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
   TextEditingController controllerDescription = new TextEditingController();
   DateTime dateTime = DateTime.now();
   String reminderValue = "Once";
-
 
   @override
   void initState() {
@@ -191,6 +188,7 @@ class _AddOrEditEventScreenState extends State<AddOrEditEventScreen> {
                           reminder: reminderValue,
                         );
                         var box = await Hive.openBox<Event>('event');
+                        print(box.path);
 
                         if (widget.isEdit) {
                           AwesomeNotifications().cancelSchedule(event.id);

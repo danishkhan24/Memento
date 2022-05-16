@@ -1,9 +1,14 @@
+import 'dart:io';
+
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:memento/src/AddOrEditEventScreen.dart';
-import 'package:memento/src/eventModel.dart';
+import 'package:memento/AddOrEditEventScreen.dart';
+import 'package:memento/Authenticator.dart';
+import 'package:memento/eventModel.dart';
 import 'package:hive/hive.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 class MyHomePage extends StatefulWidget {
   final bool darkMode;
@@ -17,6 +22,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Event> eventList = [];
   bool _darkMode;
+  File? boxFile;
+  late ImageProvider image;
 
   _MyHomePageState(this._darkMode);
 
@@ -27,12 +34,27 @@ class _MyHomePageState extends State<MyHomePage> {
         AwesomeNotifications().requestPermissionToSendNotifications();
       }
     });
+    image = NetworkImage('https://source.unsplash.com/500x800/?beach');
     getEvents();
     super.initState();
   }
 
+  @override
+  void didChangeDependencies() {
+    precacheImage(image, context);
+    super.didChangeDependencies();
+  }
+
+
   Future<void> getEvents() async {
     final box = await Hive.openBox<Event>('event');
+    try {
+      boxFile = File(box.path!);
+    }
+    catch (error){
+      print(error.toString());
+    }
+
     setState(() {
       eventList = box.values.toList();
     });
@@ -60,7 +82,26 @@ class _MyHomePageState extends State<MyHomePage> {
                 primary: Colors.black.withOpacity(0),
                 elevation: 0,
               ),
-              onPressed: () {},
+              onPressed: () async {
+                final FirebaseAuth auth = FirebaseAuth.instance;
+                GoogleSignIn googleSignIn = GoogleSignIn(
+                  scopes: [
+                    'email',
+                  ],
+                  clientId: '1062142738282-vsgm5vaar1e1cvuos3uhqjo9hd81e7hd.apps.googleusercontent.com',
+                );
+                final GoogleSignInAccount? googleAccount = await googleSignIn.signIn();
+                if (googleAccount != null){
+                  final GoogleSignInAuthentication googleSignInAuthentication =
+                  await googleAccount.authentication;
+                  final AuthCredential authCredential = GoogleAuthProvider.credential(
+                      idToken: googleSignInAuthentication.idToken,
+                      accessToken: googleSignInAuthentication.accessToken);
+
+                  UserCredential result = await auth.signInWithCredential(authCredential);
+                  User? user = result.user;
+                }
+              },
               child: Icon(
                 Icons.account_circle_outlined,
                 size: 36,
@@ -107,11 +148,36 @@ class _MyHomePageState extends State<MyHomePage> {
             ListTile(
               title: Text("Logout"),
               trailing: Icon(Icons.logout, size: 28),
+              onTap: () async {
+                GoogleSignIn _googleSignIn = GoogleSignIn(
+                  scopes: [
+                    'https://www.googleapis.com/auth/drive',
+                    'https://www.googleapis.com/auth/drive.file',
+                    'https://www.googleapis.com/auth/drive.readonly',
+                  ],
+                );
+                await _googleSignIn.disconnect();
+              },
             ),
+            ListTile(
+              title: Text("Backup"),
+              trailing: Icon(Icons.backup_outlined),
+              onTap: (){
+                GoogleDrive googleDrive = GoogleDrive();
+                if (boxFile != null) googleDrive.uploadFileToGoogleDrive(boxFile!);
+                else print("Box Empty, can not backup");
+              },
+            )
           ],
         ),
       ),
       body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: image,
+            fit: BoxFit.cover,
+          )
+        ),
         child: ListView.builder(
           itemCount: eventList.length,
           itemBuilder: _itemBuilder,
@@ -125,7 +191,7 @@ class _MyHomePageState extends State<MyHomePage> {
     double screenWidth = MediaQuery.of(context).size.width;
 
     return Padding(
-      padding: EdgeInsets.all(16.0),
+      padding: EdgeInsets.all(12.0),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -185,10 +251,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                 await AwesomeNotifications()
                                     .cancelSchedule(event.id);
                                 const snackBar = SnackBar(
-                                    content: Text("Event Deleted Successfully!"));
+                                    content:
+                                        Text("Event Deleted Successfully!"));
                                 ScaffoldMessenger.of(context)
                                     .showSnackBar(snackBar);
-                                ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                ScaffoldMessenger.of(context)
+                                    .hideCurrentSnackBar();
                                 setState(() {
                                   getEvents();
                                 });
